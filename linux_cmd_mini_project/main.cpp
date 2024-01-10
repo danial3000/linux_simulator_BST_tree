@@ -3,6 +3,7 @@
 #include <stdio.h>
 using namespace std ;
 
+
 //this function remove the spaces and put them in the arr
 void split(string str,string* arr,char seprator){
     int tedad = 0 ;
@@ -370,11 +371,14 @@ public :
     }
 };
 
-
 int main()
 {
 
-    Accounts *main = new Accounts("ali") ;
+    Accounts *main = new Accounts("main") ;
+    //Accounts *danial = new Accounts("danial") ;
+    //Accounts *ali = new Accounts("ali") ;
+    //Accounts *mohsen = new Accounts("mohsen") ;
+
     main->ask() ;
 
     /*Tree main_tree ;
