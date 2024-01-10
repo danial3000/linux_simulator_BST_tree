@@ -4,15 +4,15 @@
 using namespace std ;
 
 //this function remove the spaces and put them in the arr
-void split(string str,string* arr){
+void split(string str,string* arr,char seprator){
     int tedad = 0 ;
     string now="" ;
     for(int i=0 ; i<int(str.length()) ; i++){
-        if(str[i] != '/'){
+        if(str[i] != seprator){
             now += str[i] ;
         }
-        else if(str[i+1] == '/'){
-            while(str[i+1] == '/'){
+        else if(str[i+1] == seprator){
+            while(str[i+1] == seprator){
                 i ++ ;
             }
             arr[tedad] = now ;
@@ -53,6 +53,15 @@ private:
          }
          current->childs.clear() ;
     }
+
+    Tree_node* copy_Tree_node(Tree_node* example){
+        Tree_node *new1 = new Tree_node() ;
+        new1->value = example->value ;
+        for(int i=0 ; i<int(example->childs.size()) ; i++){
+            new1->childs.push_back(copy_Tree_node(example->childs[i])) ;
+        }
+        return new1 ;
+    }
 public :
     Tree_node *root ;
     Tree_node *current_path ;
@@ -68,6 +77,18 @@ public :
         return current_path_str ;
     }
 
+    void touch(string name){
+        Tree_node* temp = cd_return(current_path_str) ;
+        for(int i=0 ; i<int(temp->childs.size()) ; i++){
+            if(temp->childs[i]->value == name && temp->childs[i]->isfile == true){
+                throw std::invalid_argument("repeated") ;
+            }
+        }
+        Tree_node *new1 = new Tree_node() ;
+        new1->value = name ; new1->isfile = true ;
+        temp->childs.push_back(new1) ;
+    }
+
     void cd(string path){
         if(path == "..."){
             if(current_path == root){
@@ -75,7 +96,7 @@ public :
                 return ;
             }
             string address_arr[20] ;
-            split(current_path_str,address_arr);
+            split(current_path_str,address_arr,'/');
             Tree_node *current = root ;
             int start = 1 ; bool ispossible ;
             while(address_arr[start + 1] != "end of array"){
@@ -101,7 +122,7 @@ public :
         }
         else{
         string address_arr[20] ;
-        split(path,address_arr);
+        split(path,address_arr,'/');
         Tree_node *current = root ;
         int start = 1 ; bool ispossible ;
         while(address_arr[start] != "end of array"){
@@ -125,7 +146,7 @@ public :
 
     Tree_node* cd_return(string path){
         string address_arr[20] ;
-        split(path,address_arr);
+        split(path,address_arr,'/');
         Tree_node *current = root ;
         int start = 1 ; bool ispossible ;
         while(address_arr[start] != "end of array"){
@@ -146,14 +167,7 @@ public :
         current_path_str = path ;
     }
 
-    Tree_node* copy_Tree_node(Tree_node* example){
-        Tree_node *new1 = new Tree_node() ;
-        new1->value = example->value ;
-        for(int i=0 ; i<int(example->childs.size()) ; i++){
-            new1->childs.push_back(copy_Tree_node(example->childs[i])) ;
-        }
-        return new1 ;
-    }
+
 
     void cp(string path1,string path2){
         //int position = 0 ;
@@ -195,7 +209,7 @@ public :
 
     void mkdir_absolute_path(string value , string address){
         string address_arr[20] ;
-        split(address, address_arr) ;
+        split(address, address_arr,'/') ;
         int start = 1 ;
         Tree_node *current = root ;
         Tree_node *new1 = new Tree_node() ;
@@ -233,7 +247,7 @@ public :
 
    void rmdir_absolute_path(string address){
         string address_arr[20] ;
-        split(address, address_arr) ;
+        split(address, address_arr,'/') ;
         int start = 1 ;
         // we use need_for_del to access the current(we need the father of it for deleting it)
         Tree_node *current = root , *need_for_del = root ;
@@ -278,11 +292,92 @@ public :
 };
 
 
+class Accounts{
+public :
+    Tree *mytree ;
+    string name ;
+    Accounts(string name1){
+        name = name1 ;
+        mytree = new Tree() ;
+    }
+    void ask(){
+        string input , arr[7];
+        cout<<name<<" "<<"you are in "<<mytree->current_path_str<<" :" ;
+        getline(cin,input) ;
+        split(input,arr,' ') ;
+        string order = arr[0] ;
+        bool valid_input = false ;
+        try {
+        if(order == "pwd"){
+            string a = mytree->pwd() ;
+            cout<<"the current path is "<<a<<endl ;
+            valid_input = true ;
+        }
+        if(order == "mkdir" && arr[1][0] == '/'){
+            mytree->mkdir_absolute_path(arr[2],arr[1]) ;
+             valid_input = true ;
+        }
+        if(order == "mkdir" && arr[1][0] != '/'){
+            mytree->mkdir_absolute_path(arr[2],mytree->current_path_str + '/' + arr[1]) ;
+             valid_input = true ;
+        }
+        if(order == "rmdir" && arr[1][0] == '/'){
+            mytree->rmdir_absolute_path(arr[1]) ;
+             valid_input = true ;
+        }
+        if(order == "rmdir" && arr[1][0] != '/'){
+            // rmdir relative path
+             valid_input = true ;
+        }
+        if(order == "cp" ){
+            mytree->cp(arr[1],arr[2]) ;
+             valid_input = true ;
+        }
+        if(order == "mv"){
+            mytree->mv(arr[1],arr[2]) ;
+             valid_input = true ;
+        }
+        if(order == "cd"){
+            mytree->cd(arr[1]) ;
+             valid_input = true ;
+        }
+        if(order == "find"){
+            string find_ans ;
+            mytree->find(mytree->cd_return(arr[1]),arr[2][0],arr[3],find_ans) ;
+            cout<<find_ans<<endl ;
+            valid_input = true ;
+        }
+        if(order == "touch"){
+            mytree->touch(arr[1]);
+             valid_input = true ;
+        }
+        if(order == "ls"){
+            Tree_node *new1 = mytree->cd_return(arr[1]) ;
+            for(int i=0 ; i<int(new1->childs.size()) ; i++){
+                cout<<new1->childs[i]->value<<"  " ;
+            }
+            cout<<endl ;
+            valid_input = true ;
+        }
+        } catch (exception ex) {
+            cout<<ex.what()<<endl ;
+        }
+        if(!valid_input){
+            cout<<"invalid input"<<endl ;
+            ask() ;
+        }
+        ask() ;
+    }
+};
+
 
 int main()
 {
 
-    Tree main_tree ;
+    Accounts *main = new Accounts("ali") ;
+    main->ask() ;
+
+    /*Tree main_tree ;
     main_tree.mkdir_absolute_path("a","/") ;
     main_tree.mkdir_absolute_path("b","/") ;
     main_tree.mkdir_absolute_path("b","/a") ;
@@ -302,7 +397,7 @@ int main()
 
     cout<<"hdcih" ;
 
-    cout<<"hdcih" ;
+    cout<<"hdcih" ;*/
 
 
     return 0;
