@@ -202,8 +202,10 @@ public :
                 return ;
             }
             else{
+                string temp = path_to_name_str ;
                 path_to_name_str += "/" + current->childs[i]->value ;
                 find(current->childs[i],type,name,path_to_name, path_to_name_str) ;
+                path_to_name_str = temp ;
             }
         }
     }
@@ -297,9 +299,11 @@ class Accounts{
 public :
     Tree *mytree ;
     string name ;
+    static vector<Accounts*> ac ;
     Accounts(string name1){
         name = name1 ;
         mytree = new Tree() ;
+        ac.push_back(this) ;
     }
     void ask(){
         string input , arr[7];
@@ -309,6 +313,13 @@ public :
         string order = arr[0] ;
         bool valid_input = false ;
         try {
+        if(order == "su"){
+            for(int i=0 ; i<3 ; i++){
+                if(arr[1] == ac[i]->name){
+                    ac[i]->ask() ;
+                }
+            }
+        }
         if(order == "pwd"){
             string a = mytree->pwd() ;
             cout<<"the current path is "<<a<<endl ;
@@ -371,13 +382,17 @@ public :
     }
 };
 
+vector<Accounts*> Accounts::ac ;
+
 int main()
 {
 
     Accounts *main = new Accounts("main") ;
-    //Accounts *danial = new Accounts("danial") ;
-    //Accounts *ali = new Accounts("ali") ;
-    //Accounts *mohsen = new Accounts("mohsen") ;
+    Accounts *danial = new Accounts("danial") ;
+    Accounts *ali = new Accounts("ali") ;
+    Accounts *mohsen = new Accounts("mohsen") ;
+
+
 
     main->ask() ;
 
